@@ -1,13 +1,23 @@
 package main
 
 import (
+	"log"
+
 	"github.com/wryonik/microservices/appointment/controllers"
 	"github.com/wryonik/microservices/appointment/models"
 
+	"github.com/getsentry/sentry-go"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
+	err := sentry.Init(sentry.ClientOptions{
+		Dsn: "https://b3e8e3572fd444c184b0ece249f8bd07@o1176298.ingest.sentry.io/6273808",
+	})
+	if err != nil {
+		log.Fatalf("sentry.Init: %s", err)
+	}
+
 	r := gin.Default()
 
 	// Connect to database
