@@ -9,10 +9,10 @@ import (
 type Reports struct {
 	gorm.Model
 
-	DoctorId       uint
-	PatientId      uint
-	HospitalId     uint
 	ReportFiles    string
 	Date           time.Time
 	CombinedPdfUrl string
+	Doctors        *[]Doctor
+	Hospital       *[]Hospital
+	Patient        *Patient
 }

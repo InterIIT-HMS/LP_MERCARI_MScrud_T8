@@ -27,8 +27,8 @@ func main() {
 	r.GET("/doctor", controllers.FindDoctors)
 	r.GET("/doctor/:id", controllers.FindDoctor)
 	r.POST("/doctor", controllers.CreateDoctor)
-	r.PATCH("/doctor", controllers.UpdateDoctor)
-	r.DELETE("/doctor", controllers.DeleteDoctor)
+	r.PATCH("/doctor/:id", controllers.UpdateDoctor)
+	r.DELETE("/doctor/:id", controllers.DeleteDoctor)
 
 	// Patient Routes
 	r.GET("/patients", controllers.FindPatients)

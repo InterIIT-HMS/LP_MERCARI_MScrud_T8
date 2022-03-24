@@ -7,6 +7,7 @@ import (
 type Hospital struct {
 	gorm.Model
 
+	HospitalID  uint `gorm:"primaryKey;autoIncrement:true"`
 	Name        string
 	Address     string
 	PhoneNumber string

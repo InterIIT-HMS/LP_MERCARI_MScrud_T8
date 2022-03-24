@@ -17,18 +17,27 @@ type Doctor struct {
 	HospitalId  uint   `json:"hospital_id"`
 }
 
+type DoctorInput struct {
+	Name        string
+	Degree      string
+	Profession  string
+	Experience  uint
+	PhoneNumber string
+	Hospital    []models.Hospital
+}
+
 // GET /doctors
 // Find all doctors
 func FindDoctors(c *gin.Context) {
 	var doctors []models.Doctor
-	models.DB.Find(&doctors)
+	models.DB.Preload("Hospitals").Find(&doctors)
 
 	c.JSON(http.StatusOK, gin.H{"data": doctors})
 }
 
 func FindDoctorById(id uint) (*models.Doctor, error) {
 	var doctor *models.Doctor
-	if err := models.DB.Where("id = ?", id).First(&doctor).Error; err != nil {
+	if err := models.DB.Preload("Hospitals").Where("id = ?", id).First(&doctor).Error; err != nil {
 		return doctor, err
 	}
 
@@ -40,7 +49,7 @@ func FindDoctorById(id uint) (*models.Doctor, error) {
 func FindDoctor(c *gin.Context) {
 	// Get model if exist
 	var doctor models.Doctor
-	if err := models.DB.Where("id = ?", c.Param("id")).First(&doctor).Error; err != nil {
+	if err := models.DB.Preload("Hospitals").Where("id = ?", c.Param("id")).First(&doctor).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
 		return
 	}
@@ -81,21 +90,34 @@ func CreateDoctor(c *gin.Context) {
 func UpdateDoctor(c *gin.Context) {
 	// Get model if exist
 	var doctor models.Doctor
-	if err := models.DB.Where("id = ?", c.Param("id")).First(&doctor).Error; err != nil {
+	if err := models.DB.Preload("Hospitals").Where("id = ?", c.Param("id")).First(&doctor).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
 		return
 	}
 
-	// Validate input
+	// // Validate input
 	var input Doctor
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	models.DB.Model(&doctor).Updates(input)
+	hospital := make([]*models.Hospital, 1)
 
-	c.JSON(http.StatusOK, gin.H{"data": doctor})
+	var err error
+
+	hospital[0], err = FindHospitalById(input.HospitalId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// doctor.Hospitals = hospital
+	doctorUpdate := models.Doctor{Name: input.Name, Degree: input.Degree, Profession: input.Profession, Experience: input.Experience, PhoneNumber: input.PhoneNumber, Hospitals: hospital}
+
+	models.DB.Model(models.Doctor{}).Where(&doctor).Updates(&doctorUpdate)
+
+	c.JSON(http.StatusOK, gin.H{"data": doctorUpdate})
 }
 
 // DELETE /doctors/:id
