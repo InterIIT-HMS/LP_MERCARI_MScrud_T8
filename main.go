@@ -14,6 +14,7 @@ import (
 type Response struct {
 	Role  string `json:"given_name"`
 	Email string `json:"email"`
+	Id    string `json:"nickname"`
 }
 
 func authMid(c *gin.Context) {
@@ -49,6 +50,7 @@ func authMid(c *gin.Context) {
 	}
 	fmt.Println(response.Email)
 	fmt.Println(response.Role)
+	fmt.Println(response.Id)
 	c.Params = []gin.Param{
 		{
 			Key:   "email",
@@ -58,6 +60,11 @@ func authMid(c *gin.Context) {
 			Key:   "role",
 			Value: response.Role,
 		},
+		{
+			Key:   "id",
+			Value: response.Id,
+		},
+		
 	}
 }
 

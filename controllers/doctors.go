@@ -31,10 +31,13 @@ type DoctorInput struct {
 // GET /doctors
 // Find all doctors
 func FindDoctors(c *gin.Context) {
+	fmt.Println(c.Param("id"))
+	fmt.Println(c.Param("role"))
+	fmt.Println(c.Param("email"))
 	var doctors []models.Doctor
-	models.DB.Preload("Hospitals").Find(&doctors)
+	models.DB.Find(&doctors)
 
-	c.JSON(http.StatusOK, gin.H{"data": doctors})
+	c.JSON(http.StatusOK, doctors)
 }
 
 func FindDoctorById(id uint) (*models.Doctor, error) {
@@ -46,7 +49,7 @@ func FindDoctorById(id uint) (*models.Doctor, error) {
 	return doctor, nil
 }
 
-// GET /doctors/:id
+// GET /doctor/
 // Find a doctor
 func FindDoctor(c *gin.Context) {
 	// Get model if exist
@@ -71,22 +74,11 @@ func CreateDoctor(c *gin.Context) {
 		return
 	}
 
-	hospital := make([]*models.Hospital, 1)
-
-	var err error
-
-	hospital[0], err = FindHospitalById(input.HospitalId)
-	fmt.Println(hospital[0])
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
 	// Create doctor
-	doctor := models.Doctor{Name: input.Name, Degree: input.Degree, Profession: input.Profession, Experience: input.Experience, PhoneNumber: input.PhoneNumber, Hospitals: hospital}
+	doctor := models.Doctor{Name: input.Name, Degree: input.Degree, Experience: input.Experience, PhoneNumber: input.PhoneNumber, Hospitals: nil}
 	models.DB.Create(&doctor)
 
-	c.JSON(http.StatusOK, gin.H{"data": doctor})
+	c.JSON(http.StatusOK, doctor)
 }
 
 // PATCH /doctors/:id
@@ -117,7 +109,7 @@ func UpdateDoctor(c *gin.Context) {
 	}
 
 	// doctor.Hospitals = hospital
-	doctorUpdate := models.Doctor{Name: input.Name, Degree: input.Degree, Profession: input.Profession, Experience: input.Experience, PhoneNumber: input.PhoneNumber, Hospitals: hospital}
+	doctorUpdate := models.Doctor{Name: input.Name, Degree: input.Degree, Experience: input.Experience, PhoneNumber: input.PhoneNumber, Hospitals: hospital}
 
 	models.DB.Model(models.Doctor{}).Where(&doctor).Updates(&doctorUpdate)
 
