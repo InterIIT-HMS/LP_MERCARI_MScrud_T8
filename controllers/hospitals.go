@@ -69,7 +69,7 @@ func CreateHospital(c *gin.Context) {
 	hospital := models.Hospital{Name: input.Name, PhoneNumber: input.PhoneNumber, Address: input.Address, Doctors: doctorsArr}
 	models.DB.Create(&hospital)
 
-	c.JSON(http.StatusOK, gin.H{"data": hospital})
+	c.JSON(http.StatusOK, hospital)
 }
 
 // PATCH /hospitals/:id

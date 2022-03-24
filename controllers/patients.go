@@ -52,7 +52,7 @@ func CreatePatient(c *gin.Context) {
 	patient := models.Patient{Name: input.Name, NHID: input.NHID, Gender: input.Gender, Age: input.Age}
 	models.DB.Create(&patient)
 
-	c.JSON(http.StatusOK, gin.H{"data": patient})
+	c.JSON(http.StatusOK, patient)
 }
 
 // PATCH /patients/:id

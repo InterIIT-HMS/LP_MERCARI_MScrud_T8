@@ -6,7 +6,6 @@ type Doctor struct {
 	DoctorID    uint64 `gorm:"primaryKey;autoIncrement:true"`
 	Name        string
 	Degree      string
-	Profession  string
 	Experience  uint
 	PhoneNumber string
 	Hospitals   []*Hospital `gorm:"many2many:doctor_hospital;"`
