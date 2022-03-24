@@ -35,9 +35,9 @@ func FindDoctors(c *gin.Context) {
 	fmt.Println(c.Param("role"))
 	fmt.Println(c.Param("email"))
 	var doctors []models.Doctor
-	models.DB.Preload("Hospitals").Find(&doctors)
+	models.DB.Find(&doctors)
 
-	c.JSON(http.StatusOK, gin.H{"data": doctors})
+	c.JSON(http.StatusOK, doctors)
 }
 
 func FindDoctorById(id uint) (*models.Doctor, error) {
