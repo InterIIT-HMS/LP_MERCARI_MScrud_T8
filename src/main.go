@@ -64,7 +64,6 @@ func authMid(c *gin.Context) {
 			Key:   "id",
 			Value: response.Id,
 		},
-		
 	}
 }
 
