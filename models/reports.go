@@ -12,7 +12,7 @@ type Reports struct {
 	ReportFiles    string
 	Date           time.Time
 	CombinedPdfUrl string
-	Doctors        *[]Doctor
-	Hospital       *[]Hospital
-	Patient        *Patient
+	Doctors        *[]Doctor   `gorm:"foreignkey:DoctorID"`
+	Hospital       *[]Hospital `gorm:"foreignkey:HospitalID"`
+	Patient        *Patient    `gorm:"foreignkey:PatientID"`
 }

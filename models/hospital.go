@@ -1,12 +1,6 @@
 package models
 
-import (
-	"gorm.io/gorm"
-)
-
 type Hospital struct {
-	gorm.Model
-
 	HospitalID  uint `gorm:"primaryKey;autoIncrement:true"`
 	Name        string
 	Address     string

@@ -1,4 +1,4 @@
-module github.com/wryonik/microservices/appointment
+module crud
 
 go 1.17
 

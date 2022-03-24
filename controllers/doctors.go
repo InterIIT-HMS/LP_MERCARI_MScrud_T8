@@ -3,9 +3,11 @@ package controllers
 import (
 	"fmt"
 	"net/http"
+	"strconv"
+
+	"crud/models"
 
 	"github.com/gin-gonic/gin"
-	"github.com/wryonik/microservices/appointment/models"
 )
 
 type Doctor struct {
@@ -37,7 +39,7 @@ func FindDoctors(c *gin.Context) {
 
 func FindDoctorById(id uint) (*models.Doctor, error) {
 	var doctor *models.Doctor
-	if err := models.DB.Preload("Hospitals").Where("id = ?", id).First(&doctor).Error; err != nil {
+	if err := models.DB.Preload("Hospitals").Where("doctor_id = ?", id).First(&doctor).Error; err != nil {
 		return doctor, err
 	}
 
@@ -49,7 +51,9 @@ func FindDoctorById(id uint) (*models.Doctor, error) {
 func FindDoctor(c *gin.Context) {
 	// Get model if exist
 	var doctor models.Doctor
-	if err := models.DB.Preload("Hospitals").Where("id = ?", c.Param("id")).First(&doctor).Error; err != nil {
+	doctor.DoctorID, _ = strconv.ParseUint(c.Param("id"), 10, 64)
+
+	if err := models.DB.Preload("Hospitals").Where(&doctor).First(&doctor).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
 		return
 	}
@@ -71,8 +75,8 @@ func CreateDoctor(c *gin.Context) {
 
 	var err error
 
-	fmt.Println(input.HospitalId)
 	hospital[0], err = FindHospitalById(input.HospitalId)
+	fmt.Println(hospital[0])
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -90,7 +94,7 @@ func CreateDoctor(c *gin.Context) {
 func UpdateDoctor(c *gin.Context) {
 	// Get model if exist
 	var doctor models.Doctor
-	if err := models.DB.Preload("Hospitals").Where("id = ?", c.Param("id")).First(&doctor).Error; err != nil {
+	if err := models.DB.Preload("Hospitals").Where("doctor_id = ?", c.Param("id")).First(&doctor).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
 		return
 	}
@@ -125,10 +129,11 @@ func UpdateDoctor(c *gin.Context) {
 func DeleteDoctor(c *gin.Context) {
 	// Get model if exist
 	var doctor models.Doctor
-	if err := models.DB.Where("id = ?", c.Param("id")).First(&doctor).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
-		return
-	}
+	doctor.DoctorID, _ = strconv.ParseUint(c.Param("id"), 10, 64)
+	// if err := models.DB.Where("doctor_id = ?", c.Param("id")).First(&doctor).Error; err != nil {
+	// 	c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
+	// 	return
+	// }
 
 	models.DB.Delete(&doctor)
 

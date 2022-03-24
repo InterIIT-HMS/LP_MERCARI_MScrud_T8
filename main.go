@@ -1,47 +1,95 @@
 package main
 
 import (
-	"log"
+	"crud/controllers"
+	"crud/models"
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"net/http"
 
-	"github.com/wryonik/microservices/appointment/controllers"
-	"github.com/wryonik/microservices/appointment/models"
-
-	"github.com/getsentry/sentry-go"
 	"github.com/gin-gonic/gin"
 )
 
-func main() {
-	err := sentry.Init(sentry.ClientOptions{
-		Dsn: "https://b3e8e3572fd444c184b0ece249f8bd07@o1176298.ingest.sentry.io/6273808",
-	})
+type Response struct {
+	Role  string `json:"given_name"`
+	Email string `json:"email"`
+}
+
+func authMid(c *gin.Context) {
+
+	url := "https://dev-rgmfg73e.us.auth0.com/userinfo"
+	method := "GET"
+
+	client := &http.Client{}
+	req, err := http.NewRequest(method, url, nil)
+
 	if err != nil {
-		log.Fatalf("sentry.Init: %s", err)
+		fmt.Println(err)
+		return
 	}
+	req.Header.Add("Authorization", c.Request.Header["Authorization"][0])
+
+	res, err := client.Do(req)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer res.Body.Close()
+
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	response := Response{}
+	json.Unmarshal(body, &response)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(response.Email)
+	fmt.Println(response.Role)
+	c.Params = []gin.Param{
+		{
+			Key:   "email",
+			Value: response.Email,
+		},
+		{
+			Key:   "role",
+			Value: response.Role,
+		},
+	}
+}
+
+func main() {
 
 	r := gin.Default()
 
 	// Connect to database
 	models.ConnectDatabase()
 
+	secureGroup := r.Group("/secure/", authMid)
+
 	// Doctor Routes
-	r.GET("/doctor", controllers.FindDoctors)
-	r.GET("/doctor/:id", controllers.FindDoctor)
+	secureGroup.GET("/doctors", controllers.FindDoctors)
+	secureGroup.GET("/doctor/:id", controllers.FindDoctor)
 	r.POST("/doctor", controllers.CreateDoctor)
-	r.PATCH("/doctor/:id", controllers.UpdateDoctor)
-	r.DELETE("/doctor/:id", controllers.DeleteDoctor)
+	secureGroup.PATCH("/doctor/:id", controllers.UpdateDoctor)
+	secureGroup.DELETE("/doctor/:id", controllers.DeleteDoctor)
 
 	// Patient Routes
-	r.GET("/patients", controllers.FindPatients)
-	r.GET("/patients/:id", controllers.FindPatient)
-	r.POST("/patients", controllers.CreatePatient)
-	r.PATCH("/patients/:id", controllers.UpdatePatient)
-	r.DELETE("/patients/:id", controllers.DeletePatient)
+	secureGroup.GET("/patients", controllers.FindPatients)
+	secureGroup.GET("/patient/:id", controllers.FindPatient)
+	r.POST("/patient", controllers.CreatePatient)
+	secureGroup.PATCH("/patient/:id", controllers.UpdatePatient)
+	secureGroup.DELETE("/patient/:id", controllers.DeletePatient)
 
 	// Hostpital Routes
-	r.GET("/hospitals", controllers.FindHospitals)
-	r.POST("/hospitals", controllers.CreateHospital)
-	r.PATCH("/hospitals", controllers.UpdateHospital)
-	r.DELETE("/hospitals", controllers.DeleteHospital)
+	secureGroup.GET("/hospitals", controllers.FindHospitals)
+	secureGroup.GET("/hospital/:id", controllers.FindHospital)
+	r.POST("/hospital", controllers.CreateHospital)
+	secureGroup.PATCH("/hospital/:id", controllers.UpdateHospital)
+	secureGroup.DELETE("/hospital/:id", controllers.DeleteHospital)
 
 	// Run the server
 	r.Run()

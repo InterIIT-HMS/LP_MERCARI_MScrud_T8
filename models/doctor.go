@@ -1,14 +1,9 @@
 package models
 
-import (
-	"time"
-
-	"gorm.io/gorm"
-)
+import "time"
 
 type Doctor struct {
-	gorm.Model
-
+	DoctorID    uint64 `gorm:"primaryKey;autoIncrement:true"`
 	Name        string
 	Degree      string
 	Profession  string

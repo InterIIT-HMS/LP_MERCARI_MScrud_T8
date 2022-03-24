@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"net/http"
 
+	"crud/models"
+
 	"github.com/gin-gonic/gin"
-	"github.com/wryonik/microservices/appointment/models"
 )
 
 type PatientInput struct {
@@ -29,7 +30,7 @@ func FindPatients(c *gin.Context) {
 func FindPatient(c *gin.Context) {
 	// Get model if exist
 	var patient models.Patient
-	if err := models.DB.Where("id = ?", c.Param("id")).First(&patient).Error; err != nil {
+	if err := models.DB.Where("patient_id = ?", c.Param("id")).First(&patient).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
 		return
 	}
@@ -58,9 +59,8 @@ func CreatePatient(c *gin.Context) {
 // Update a patient
 func UpdatePatient(c *gin.Context) {
 	// Get model if exist
-	println("*******")
 	var patient models.Patient
-	if err := models.DB.Where("id = ?", c.Param("id")).First(&patient).Error; err != nil {
+	if err := models.DB.Where("patient_id = ?", c.Param("id")).First(&patient).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Record not found!"})
 		return
 	}
